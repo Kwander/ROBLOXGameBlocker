@@ -38,6 +38,10 @@ function addBlockButtons() {
             const gameId = getGameId(card);
             if (!gameId) return;
             
+            // Get game title
+            const titleElement = card.querySelector('.game-card-name') || card.querySelector('a[title]');
+            const gameTitle = titleElement ? titleElement.textContent.trim() : gameId;
+            
             const blockBtn = document.createElement('button');
             blockBtn.className = 'game-block-btn';
             blockBtn.innerHTML = '✖';
@@ -46,8 +50,8 @@ function addBlockButtons() {
             blockBtn.addEventListener('click', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                if (!blockedGames.includes(gameId)) {
-                    blockedGames.push(gameId);
+                if (!blockedGames.some(game => game.id === gameId)) {
+                    blockedGames.push({ id: gameId, title: gameTitle });
                     chrome.storage.sync.set({ 'blockedGames': blockedGames });
                     card.remove();
                 }
@@ -66,6 +70,10 @@ function addBlockButtons() {
             const gameId = getGameId(card);
             if (!gameId) return;
             
+            // Get game title
+            const titleElement = card.querySelector('.game-card-name') || card.querySelector('[title]');
+            const gameTitle = titleElement ? titleElement.textContent.trim() : gameId;
+            
             const blockBtn = document.createElement('button');
             blockBtn.className = 'game-block-btn';
             blockBtn.innerHTML = '✖';
@@ -74,8 +82,8 @@ function addBlockButtons() {
             blockBtn.addEventListener('click', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                if (!blockedGames.includes(gameId)) {
-                    blockedGames.push(gameId);
+                if (!blockedGames.some(game => game.id === gameId)) {
+                    blockedGames.push({ id: gameId, title: gameTitle });
                     chrome.storage.sync.set({ 'blockedGames': blockedGames });
                     const parentDiv = card.parentElement;
                     if (parentDiv) {
@@ -97,7 +105,7 @@ function hideBlockedGames() {
     const chartGameCards = document.querySelectorAll('.list-item.game-card');
     chartGameCards.forEach(card => {
         const gameId = getGameId(card);
-        if (gameId && blockedGames.includes(gameId)) {
+        if (gameId && blockedGames.some(game => game.id === gameId)) {
             card.remove();
         }
     });
@@ -106,7 +114,7 @@ function hideBlockedGames() {
     const homeGameCards = document.querySelectorAll('.game-card-link');
     homeGameCards.forEach(card => {
         const gameId = getGameId(card);
-        if (gameId && blockedGames.includes(gameId)) {
+        if (gameId && blockedGames.some(game => game.id === gameId)) {
             const parentDiv = card.parentElement;
             if (parentDiv) {
                 parentDiv.remove();

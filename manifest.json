@@ -9,6 +9,13 @@
   "host_permissions": [
     "*://*.roblox.com/*"
   ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "48": "icon48.png",
+      "128": "icon128.png"
+    }
+  },
   "content_scripts": [
     {
       "matches": ["*://*.roblox.com/*"],

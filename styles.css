@@ -14,8 +14,17 @@
     align-items: center;
     justify-content: center;
     font-size: 14px;
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
 }
 
 .game-block-btn:hover {
     background-color: #45a049;
+}
+
+/* Show button when hovering over the game card */
+.game-card:hover .game-block-btn,
+.list-item:hover .game-block-btn,
+.game-card-link:hover .game-block-btn {
+    opacity: 1;
 } 

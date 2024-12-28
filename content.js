@@ -5,17 +5,37 @@ let blockedGames = [];
 chrome.storage.sync.get(['blockedGames'], function(result) {
     if (result.blockedGames) {
         blockedGames = result.blockedGames;
-        hideBlockedGames(); // Hide games immediately after loading stored IDs
+        hideBlockedGames();
     }
 });
 
-// Function to add block buttons to game cards
-function addBlockButtons() {
-    const gameLinks = document.querySelectorAll('a.game-card-link');
+function getGameId(element) {
+    // Try getting ID from home page format first
+    let gameId = element.id;
     
-    gameLinks.forEach(link => {
-        if (!link.querySelector('.game-block-btn')) {
-            const gameId = link.id; // Get the ID directly from the link
+    // If no ID found, try getting it from charts page URL format
+    if (!gameId) {
+        const gameLink = element.querySelector('a[href*="/games/"]') || element;
+        if (gameLink && gameLink.href) {
+            const universeIdMatch = gameLink.href.match(/universeId=(\d+)/);
+            if (universeIdMatch) {
+                gameId = universeIdMatch[1];
+            }
+        }
+    }
+    return gameId;
+}
+
+function addBlockButtons() {
+    // For charts page
+    const chartGameCards = document.querySelectorAll('.list-item.game-card');
+    // For home page
+    const homeGameCards = document.querySelectorAll('.game-card-link');
+    
+    // Handle charts page cards
+    chartGameCards.forEach(card => {
+        if (!card.querySelector('.game-block-btn')) {
+            const gameId = getGameId(card);
             if (!gameId) return;
             
             const blockBtn = document.createElement('button');
@@ -29,14 +49,42 @@ function addBlockButtons() {
                 if (!blockedGames.includes(gameId)) {
                     blockedGames.push(gameId);
                     chrome.storage.sync.set({ 'blockedGames': blockedGames });
-                    const gameCard = link.closest('.game-card');
-                    if (gameCard) {
-                        gameCard.remove(); // Remove the element instead of hiding it
+                    card.remove();
+                }
+            });
+            
+            const thumbnailContainer = card.querySelector('.game-card-thumb-container');
+            if (thumbnailContainer) {
+                thumbnailContainer.appendChild(blockBtn);
+            }
+        }
+    });
+
+    // Handle home page cards
+    homeGameCards.forEach(card => {
+        if (!card.querySelector('.game-block-btn')) {
+            const gameId = getGameId(card);
+            if (!gameId) return;
+            
+            const blockBtn = document.createElement('button');
+            blockBtn.className = 'game-block-btn';
+            blockBtn.innerHTML = '✖';
+            blockBtn.title = 'Block this game';
+            
+            blockBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (!blockedGames.includes(gameId)) {
+                    blockedGames.push(gameId);
+                    chrome.storage.sync.set({ 'blockedGames': blockedGames });
+                    const parentDiv = card.parentElement;
+                    if (parentDiv) {
+                        parentDiv.remove();
                     }
                 }
             });
             
-            const thumbnailContainer = link.querySelector('.game-card-thumb-container');
+            const thumbnailContainer = card.querySelector('.thumbnail-2d-container');
             if (thumbnailContainer) {
                 thumbnailContainer.appendChild(blockBtn);
             }
@@ -44,28 +92,33 @@ function addBlockButtons() {
     });
 }
 
-// Function to hide blocked games
 function hideBlockedGames() {
-    const gameLinks = document.querySelectorAll('a.game-card-link');
-    gameLinks.forEach(link => {
-        const gameId = link.id;
-        if (blockedGames.includes(gameId)) {
-            const gameCard = link.closest('.game-card');
-            if (gameCard) {
-                gameCard.remove(); // Remove the element instead of hiding it
+    // Hide from charts page
+    const chartGameCards = document.querySelectorAll('.list-item.game-card');
+    chartGameCards.forEach(card => {
+        const gameId = getGameId(card);
+        if (gameId && blockedGames.includes(gameId)) {
+            card.remove();
+        }
+    });
+
+    // Hide from home page
+    const homeGameCards = document.querySelectorAll('.game-card-link');
+    homeGameCards.forEach(card => {
+        const gameId = getGameId(card);
+        if (gameId && blockedGames.includes(gameId)) {
+            const parentDiv = card.parentElement;
+            if (parentDiv) {
+                parentDiv.remove();
             }
         }
     });
 }
 
-// Create and start the observer
-const observer = new MutationObserver((mutations) => {
-    mutations.forEach((mutation) => {
-        if (mutation.addedNodes.length) {
-            addBlockButtons();
-            hideBlockedGames();
-        }
-    });
+// Create an observer to watch for new game cards
+const observer = new MutationObserver(() => {
+    addBlockButtons();
+    hideBlockedGames();
 });
 
 // Start observing

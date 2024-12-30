@@ -159,9 +159,15 @@ function addGamePageBlockButton() {
   
   // Create block button container
   const blockBtn = document.createElement('button');
-  blockBtn.className = 'game-block-btn game-page-block-btn';
+  blockBtn.className = 'game-block-btn';
   blockBtn.innerHTML = '✖';
   blockBtn.title = 'Block this game';
+  
+  // Check if already blocked
+  const isBlocked = blockedGames.some(game => game.id === universeId);
+  if (isBlocked) {
+    blockBtn.classList.add('blocked');
+  }
   
   blockBtn.addEventListener('click', (e) => {
     e.preventDefault();
@@ -169,10 +175,10 @@ function addGamePageBlockButton() {
     if (!blockedGames.some(game => game.id === universeId)) {
       blockedGames.push({ id: universeId, title: gameTitle });
       chrome.storage.sync.set({ 'blockedGames': blockedGames });
+      blockBtn.classList.add('blocked');
     }
   });
 
-  // Add button to the action section
   actionSection.style.position = 'relative';
   actionSection.appendChild(blockBtn);
 }

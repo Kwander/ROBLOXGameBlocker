@@ -139,4 +139,53 @@ observer.observe(document.body, {
 setTimeout(() => {
     addBlockButtons();
     hideBlockedGames();
-}, 1000); 
+}, 1000);
+
+// Add this function to detect game page
+function isGamePage() {
+  return window.location.pathname.includes('/games/') && 
+         document.querySelector('#game-detail-meta-data');
+}
+
+// Add this function to handle game page blocking
+function addGamePageBlockButton() {
+  const actionSection = document.querySelector('.game-calls-to-action');
+  const gameMetaData = document.querySelector('#game-detail-meta-data');
+  
+  if (!actionSection || !gameMetaData) return;
+  
+  const universeId = gameMetaData.getAttribute('data-universe-id');
+  const gameTitle = document.querySelector('h1')?.textContent || universeId;
+  
+  // Create block button container
+  const blockBtn = document.createElement('button');
+  blockBtn.className = 'game-block-btn game-page-block-btn';
+  blockBtn.innerHTML = '✖';
+  blockBtn.title = 'Block this game';
+  
+  blockBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!blockedGames.some(game => game.id === universeId)) {
+      blockedGames.push({ id: universeId, title: gameTitle });
+      chrome.storage.sync.set({ 'blockedGames': blockedGames });
+    }
+  });
+
+  // Add button to the action section
+  actionSection.style.position = 'relative';
+  actionSection.appendChild(blockBtn);
+}
+
+// Modify the existing initialization code
+function init() {
+  if (isGamePage()) {
+    addGamePageBlockButton();
+  } else {
+    // Existing code for home/discovery pages
+    hideBlockedGames();
+  }
+}
+
+// Call init on page load
+init(); 

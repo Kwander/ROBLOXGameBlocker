@@ -20,6 +20,8 @@
 
 .game-block-btn:hover {
     background-color: #45a049;
+    transform: scale(1.1);
+    transition: transform 0.2s;
 }
 
 /* Show button when hovering over the game card */
@@ -27,4 +29,28 @@
 .list-item:hover .game-block-btn,
 .game-card-link:hover .game-block-btn {
     opacity: 1;
+} 
+
+.game-thumbnail-container {
+    position: relative;
+} 
+
+.game-page-block-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: #ff0000;
+    opacity: 1;
+    width: 30px;
+    height: 30px;
+    font-size: 16px;
+    z-index: 100;
+}
+
+.game-page-block-btn:hover {
+    background-color: #cc0000;
+}
+
+.game-calls-to-action {
+    position: relative !important;
 } 

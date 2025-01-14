@@ -87,7 +87,13 @@ function addBlockButtons() {
                     chrome.storage.sync.set({ 'blockedGames': blockedGames });
                     const parentDiv = card.parentElement;
                     if (parentDiv) {
-                        parentDiv.remove();
+                        // Find the closest li parent and remove it
+                        const listItem = parentDiv.closest('li');
+                        if (listItem) {
+                            listItem.remove();
+                        } else {
+                            parentDiv.remove();
+                        }
                     }
                 }
             });
@@ -117,7 +123,13 @@ function hideBlockedGames() {
         if (gameId && blockedGames.some(game => game.id === gameId)) {
             const parentDiv = card.parentElement;
             if (parentDiv) {
-                parentDiv.remove();
+                // Find the closest li parent and remove it
+                const listItem = parentDiv.closest('li');
+                if (listItem) {
+                    listItem.remove();
+                } else {
+                    parentDiv.remove();
+                }
             }
         }
     });

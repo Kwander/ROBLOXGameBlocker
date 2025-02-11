@@ -141,18 +141,6 @@ const observer = new MutationObserver(() => {
     hideBlockedGames();
 });
 
-// Start observing
-observer.observe(document.body, {
-    childList: true,
-    subtree: true
-});
-
-// Initial run
-setTimeout(() => {
-    addBlockButtons();
-    hideBlockedGames();
-}, 1000);
-
 // Add this function to detect game page
 function isGamePage() {
   return window.location.pathname.includes('/games/') && 
@@ -199,11 +187,39 @@ function addGamePageBlockButton() {
 function init() {
   if (isGamePage()) {
     addGamePageBlockButton();
+  } else if (window.location.pathname === '/home' || window.location.pathname === '/') {
+    // For home page, wait for content to be stable
+    const checkForContent = () => {
+      const gameCards = document.querySelectorAll('.game-card-link');
+      if (gameCards.length > 0) {
+        // Wait an additional second for any dynamic content to settle
+        setTimeout(() => {
+          hideBlockedGames();
+          // Start observing after initial load
+          observer.observe(document.body, {
+            childList: true,
+            subtree: true
+          });
+        }, 1000);
+      } else {
+        // Check again in 500ms if no game cards found
+        setTimeout(checkForContent, 500);
+      }
+    };
+    checkForContent();
   } else {
-    // Existing code for home/discovery pages
+    // For other pages, proceed as normal
     hideBlockedGames();
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true
+    });
   }
 }
 
-// Call init on page load
-init(); 
+// Call init when DOM is ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+} 
